@@ -33,6 +33,7 @@ interface PlayerContextType {
   seek: (percentage: number) => void;
   activePeriodId: number;
   setActivePeriodId: (id: number) => void;
+  hasPlayed: boolean;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -43,6 +44,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [activePeriodId, setActivePeriodId] = useState<number>(1);
+  const [hasPlayed, setHasPlayed] = useState<boolean>(false);
   const timerRef = useRef<number | null>(null);
 
   const duration = currentTrack.duration;
@@ -100,10 +102,14 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setCurrentTrack(track);
     setCurrentTime(0);
     setIsPlaying(true);
+    setHasPlayed(true);
   };
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
+    if (!hasPlayed) {
+      setHasPlayed(true);
+    }
   };
 
   const nextTrack = () => {
@@ -147,6 +153,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         seek,
         activePeriodId,
         setActivePeriodId,
+        hasPlayed,
       }}
     >
       {children}

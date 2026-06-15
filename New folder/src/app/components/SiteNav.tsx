@@ -24,14 +24,13 @@ export function SiteNav() {
       <motion.header
         className="fixed top-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: solid ? "rgba(10,5,0,0.96)" : "transparent",
-          backdropFilter: solid ? "blur(16px)" : "none",
-          borderBottom: solid ? "1px solid rgba(194,164,126,0.12)" : "none",
-          transition: "background-color 0.4s, backdrop-filter 0.4s, border-color 0.4s",
+          backgroundColor: "rgba(10,5,0,0.96)",
+          backdropFilter: "blur(16px)",
+          borderBottom: "1px solid rgba(194,164,126,0.12)",
         }}
-        initial={{ y: -60 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        initial={{ y: -100 }}
+        animate={{ y: solid ? 0 : -100 }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
           {/* Wordmark */}
