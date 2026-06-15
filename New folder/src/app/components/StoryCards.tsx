@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { ArrowUpRight, Play } from "lucide-react";
 import { Grain, filmFilter } from "./Grain";
 
-const FEATURE = {
+export const FEATURE = {
   id: 1,
   era: "1960s",
   song: "Diễm Xưa",
@@ -14,7 +14,7 @@ const FEATURE = {
   readTime: "8 phút đọc",
 };
 
-const STORIES = [
+export const STORIES = [
   {
     id: 2,
     era: "1970s",
@@ -47,7 +47,7 @@ const STORIES = [
   },
 ];
 
-function StorySmall({ story, index }: { story: typeof STORIES[0]; index: number }) {
+function StorySmall({ story, index, onClick }: { story: typeof STORIES[0]; index: number; onClick: () => void }) {
   const [hovered, setHovered] = useState(false);
   return (
     <motion.article
@@ -55,6 +55,7 @@ function StorySmall({ story, index }: { story: typeof STORIES[0]; index: number 
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: index * 0.13 }}
+      onClick={onClick}
       className="group cursor-pointer flex gap-4 items-start border-b border-[rgba(26,26,26,0.1)] pb-6 last:border-0 last:pb-0"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -114,6 +115,10 @@ function StorySmall({ story, index }: { story: typeof STORIES[0]; index: number 
 }
 
 export function StoryCards() {
+  const handleCardClick = (id: number) => {
+    window.open(`/?story=${id}`, "_blank");
+  };
+
   return (
     <section className="bg-[#F5F1E8] py-20 px-6">
       <div className="max-w-7xl mx-auto">
@@ -145,6 +150,7 @@ export function StoryCards() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
+            onClick={() => handleCardClick(FEATURE.id)}
             className="lg:col-span-2 group cursor-pointer"
           >
             {/* Full-bleed image */}
@@ -240,7 +246,7 @@ export function StoryCards() {
               Thêm câu chuyện
             </p>
             {STORIES.map((story, i) => (
-              <StorySmall key={story.id} story={story} index={i} />
+              <StorySmall key={story.id} story={story} index={i} onClick={() => handleCardClick(story.id)} />
             ))}
           </div>
         </div>

@@ -1,4 +1,5 @@
 import "../styles/fonts.css";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { SiteNav } from "./components/SiteNav";
 import { HeroSection } from "./components/HeroSection";
@@ -10,6 +11,7 @@ import { SiteFooter } from "./components/SiteFooter";
 import { Grain } from "./components/Grain";
 import { PlayerProvider } from "./context/PlayerContext";
 import { MusicPlayerBar } from "./components/MusicPlayerBar";
+import { StoryPage } from "./components/StoryPage";
 
 function RedQuoteBand() {
   return (
@@ -54,6 +56,28 @@ function RedQuoteBand() {
 }
 
 export default function App() {
+  const [storyId, setStoryId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("story");
+    if (id) {
+      setStoryId(parseInt(id));
+    }
+  }, []);
+
+  if (storyId !== null) {
+    return (
+      <StoryPage
+        id={storyId}
+        onClose={() => {
+          window.history.replaceState({}, document.title, window.location.pathname);
+          setStoryId(null);
+        }}
+      />
+    );
+  }
+
   return (
     <PlayerProvider>
       <div

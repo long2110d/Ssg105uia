@@ -24,6 +24,7 @@ export const MusicPlayerBar: React.FC = () => {
     togglePlay,
     seek,
     hasPlayed,
+    setIsDetailOpen,
   } = usePlayer();
 
   const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -61,7 +62,10 @@ export const MusicPlayerBar: React.FC = () => {
           />
 
           {/* Left Section: Cover Art + Text Info */}
-          <div className="flex items-center gap-3.5 min-w-0 z-10">
+          <div
+            onClick={() => setIsDetailOpen(true)}
+            className="flex items-center gap-3.5 min-w-0 z-10 cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all"
+          >
             {/* Mini Album Art */}
             <div
               className="w-12 h-12 flex-shrink-0 rounded-lg flex items-center justify-center font-bold text-white relative shadow-md overflow-hidden"
