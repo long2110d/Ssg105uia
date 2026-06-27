@@ -53,7 +53,7 @@ export const PERIODS: Period[] = [
     color: "#2D4A3E",
     songs: [
       { title: "Như Có Bác Trong Ngày Vui Đại Thắng", artist: "Phạm Tuyên", duration: 198, audioUrl: "/songs/nhu-co-bac-ho.mp3" },
-      { title: "Trường Sơn Đông, Trường Sơn Tây", artist: "Hoàng Hiệp / Phạm Tiến Duật", duration: 220, audioUrl: "/songs/truong-son-dong-truong-son-tay.webm" },
+      { title: "Trường Sơn Đông, Trường Sơn Tây", artist: "Hoàng Hiệp / Phạm Tiến Duật", duration: 220, audioUrl: "/songs/truong-son-dong-truong-son-tay.mp3" },
       { title: "Nối Vòng Tay Lớn", artist: "Trịnh Công Sơn", duration: 285, audioUrl: "/songs/noi-vong-tay-lon.webm" }
     ],
     body: "Tiếng hát át tiếng bom. Âm nhạc là vũ khí tinh thần mạnh mẽ, đồng hành cùng những đoàn quân xẻ dọc Trường Sơn đi cứu nước.",
