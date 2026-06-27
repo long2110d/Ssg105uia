@@ -72,10 +72,14 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     if (audioRef.current) {
       if (currentTrack.audioUrl) {
-        audioRef.current.src = currentTrack.audioUrl;
+        // Encode URI to handle spaces and special characters in file names
+        audioRef.current.src = encodeURI(currentTrack.audioUrl);
         audioRef.current.currentTime = 0;
         if (isPlaying) {
-          audioRef.current.play().catch(console.error);
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(console.error);
+          }
         }
       } else {
         audioRef.current.pause();
@@ -88,7 +92,10 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     if (audioRef.current && currentTrack.audioUrl) {
       if (isPlaying) {
-        audioRef.current.play().catch(console.error);
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(console.error);
+        }
       } else {
         audioRef.current.pause();
       }
