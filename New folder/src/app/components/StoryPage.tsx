@@ -1,7 +1,10 @@
-import React from "react";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ArrowLeft, BookOpen, Play, Pause, Music } from "lucide-react";
 import { FEATURE, STORIES } from "./StoryCards";
 import { Grain, filmFilter } from "./Grain";
+import { usePlayer } from "../context/PlayerContext";
+import { PERIODS } from "../data/periods";
+import { motion, AnimatePresence } from "motion/react";
 
 interface StoryPageProps {
   id: number;
@@ -51,7 +54,7 @@ export const StoryPage: React.FC<StoryPageProps> = ({ id, onClose }) => {
   const currentNarrative = narratives[story.id] || narratives[1];
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] text-[#1A1A1A] relative selection:bg-[#8B0000] selection:text-[#F5F1E8] pb-20">
+    <div className="min-h-screen bg-[#F5F1E8] text-[#1A1A1A] relative selection:bg-[#8B0000] selection:text-[#F5F1E8] pb-24">
       {/* Noise layer */}
       <Grain opacity={0.06} />
 
@@ -212,6 +215,221 @@ export const StoryPage: React.FC<StoryPageProps> = ({ id, onClose }) => {
           </span>
         </div>
       </main>
+
+      {/* Story Page Collapsing Music Player Bar */}
+      <StoryPlayerBar story={story} />
     </div>
   );
 };
+
+// Sub-component for Story Page collapsing music player
+function StoryPlayerBar({ story }: { story: typeof FEATURE | typeof STORIES[0] }) {
+  const {
+    currentTrack,
+    isPlaying,
+    togglePlay,
+    playTrack,
+    hasPlayed,
+  } = usePlayer();
+
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(!isPlaying);
+
+  // Sync collapsed state with playback: if it becomes paused, collapse it!
+  useEffect(() => {
+    if (!isPlaying) {
+      setIsCollapsed(true);
+    } else {
+      setIsCollapsed(false);
+    }
+  }, [isPlaying]);
+
+  // Helper to find song in periods
+  const findSongInPeriods = (songTitle: string) => {
+    for (const period of PERIODS) {
+      const song = period.songs.find(
+        (s) => s.title.toLowerCase() === songTitle.toLowerCase()
+      );
+      if (song) return { song, periodId: period.id };
+    }
+    return null;
+  };
+
+  // Get current story song details
+  const matched = findSongInPeriods(story.song);
+  const storySong = matched
+    ? matched.song
+    : { title: story.song, artist: story.artist, duration: 240 };
+  const periodId = matched ? matched.periodId : 4;
+
+  const handlePlayToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    // Check if the current track is this story's song. If not, play this story's song!
+    const isThisStoryTrack = currentTrack.title.toLowerCase() === story.song.toLowerCase();
+
+    if (!isThisStoryTrack) {
+      playTrack(storySong, periodId);
+    } else {
+      togglePlay();
+    }
+  };
+
+  const handleCollapsedClick = () => {
+    setIsCollapsed(false);
+    // Auto-resume play when expanding
+    const isThisStoryTrack = currentTrack.title.toLowerCase() === story.song.toLowerCase();
+    if (!isThisStoryTrack) {
+      playTrack(storySong, periodId);
+    } else if (!isPlaying) {
+      togglePlay();
+    }
+  };
+
+  // Decide what track details to display
+  const activeTrack = hasPlayed
+    ? currentTrack
+    : {
+        title: story.song,
+        artist: story.artist,
+        coverNum: String(story.id).padStart(2, "0"),
+        color: "#8B0000",
+      };
+
+  const artistText = activeTrack.artist.split("/")[0].trim();
+  const coverNum = activeTrack.coverNum || "01";
+  const color = activeTrack.color || "#8B0000";
+  const title = activeTrack.title;
+
+  return (
+    <AnimatePresence>
+      {isCollapsed ? (
+        /* Collapsed Pill Button in Bottom-Right Corner */
+        <motion.button
+          key="collapsed-player"
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: 20 }}
+          onClick={handleCollapsedClick}
+          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-[#121212] border border-[#C2A47E]/30 text-[#F5F1E8] shadow-[0_10px_30px_rgba(0,0,0,0.6),0_0_20px_rgba(194,164,126,0.15)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer z-40 group overflow-hidden"
+        >
+          {/* Animated vinyl platter look inside the button */}
+          <div
+            className="absolute inset-1.5 rounded-full border border-white/10 bg-black flex items-center justify-center relative shadow-inner animate-spin"
+            style={{
+              backgroundImage: "repeating-radial-gradient(circle, #181818, #0e0e0e 1px, #181818 2px)",
+              animationDuration: "8s",
+            }}
+          >
+            {/* Center label colored like active track */}
+            <div
+              className="w-5 h-5 rounded-full flex items-center justify-center text-[7px] font-bold text-white/70"
+              style={{ backgroundColor: color }}
+            >
+              {parseInt(coverNum)}
+            </div>
+            {/* Play overlay hover indicator */}
+            <div className="absolute inset-0 bg-[#8B0000]/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">
+              <Play className="w-4 h-4 text-[#F5F1E8] fill-[#F5F1E8] translate-x-[0.5px]" />
+            </div>
+          </div>
+        </motion.button>
+      ) : (
+        /* Expanded Player Bar Centered at bottom */
+        <motion.div
+          key="expanded-player"
+          initial={{ opacity: 0, y: 50, x: "-50%" }}
+          animate={{ opacity: 1, y: 0, x: "-50%" }}
+          exit={{ opacity: 0, y: 50, x: "-50%" }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="fixed bottom-6 left-1/2 z-40 w-[90%] sm:w-[460px] h-16 bg-[#121212]/95 border border-[#C2A47E]/20 rounded-full shadow-[0_20px_45px_rgba(0,0,0,0.6),0_0_30px_rgba(194,164,126,0.08)] flex items-center justify-between px-5 py-3 backdrop-blur-md select-none overflow-hidden"
+        >
+          {/* Subtle ambient glow */}
+          <div
+            className="absolute inset-0 opacity-15 pointer-events-none"
+            style={{
+              background: `radial-gradient(circle at 10% 50%, ${color} 0%, transparent 60%)`,
+            }}
+          />
+
+          {/* Left section: mini cover + title + wave */}
+          <div className="flex items-center gap-3 min-w-0 z-10">
+            {/* Spinning Disc */}
+            <div
+              className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-white relative shadow border border-white/5 overflow-hidden ${isPlaying ? "animate-spin" : ""}`}
+              style={{
+                backgroundColor: color,
+                fontFamily: "'Fraunces', serif",
+                animationDuration: "7s",
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-white/10" />
+              <span className="text-[10px] font-black tracking-tighter" style={{ color: "#F5F1E8" }}>
+                {parseInt(coverNum)}
+              </span>
+              <div className="w-1.5 h-1.5 rounded-full bg-neutral-900 absolute" />
+            </div>
+
+            {/* Title & Artist & Soundwave */}
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-white text-xs font-semibold truncate max-w-[130px] sm:max-w-[160px] font-sans">
+                  {title}
+                </span>
+                {isPlaying && <DynamicSoundwave />}
+              </div>
+              <span className="text-white/40 text-[9px] truncate mt-0.5 font-sans uppercase tracking-widest font-medium">
+                {artistText}
+              </span>
+            </div>
+          </div>
+
+          {/* Right section: Play/Pause button + Collapse Button */}
+          <div className="flex items-center gap-3.5 z-10">
+            {/* Play/Pause */}
+            <button
+              onClick={handlePlayToggle}
+              className="w-9 h-9 rounded-full bg-[#C2A47E] hover:bg-[#D4B893] text-black flex items-center justify-center shadow hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            >
+              {isPlaying ? (
+                <Pause className="w-4 h-4 fill-black text-black" />
+              ) : (
+                <Play className="w-4 h-4 fill-black text-black translate-x-[0.5px]" />
+              )}
+            </button>
+
+            {/* Minimize button */}
+            <button
+              onClick={() => setIsCollapsed(true)}
+              className="text-white/40 hover:text-white transition-colors cursor-pointer text-[9px] uppercase tracking-widest font-bold px-2 py-1 bg-white/5 rounded-md border border-white/5 font-sans"
+            >
+              Ẩn
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// Micro Soundwave animation bars
+function DynamicSoundwave() {
+  return (
+    <div className="flex items-end gap-[1.5px] h-3 pb-[1px] px-1 select-none">
+      {[0.4, 0.2, 0.6, 0.3, 0.5].map((delay, index) => (
+        <motion.div
+          key={index}
+          animate={{
+            height: [3, 11, 3],
+          }}
+          transition={{
+            duration: 0.6 + delay * 0.4,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: delay,
+          }}
+          className="w-[2px] bg-[#C2A47E] rounded-full"
+        />
+      ))}
+    </div>
+  );
+}

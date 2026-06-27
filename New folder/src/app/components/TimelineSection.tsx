@@ -3,7 +3,16 @@ import { motion, AnimatePresence } from "motion/react";
 import { Grain } from "./Grain";
 import { PERIODS, Song } from "../data/periods";
 import { usePlayer } from "../context/PlayerContext";
-import { Heart, ArrowDownCircle, MoreHorizontal, Clock, Play, Pause } from "lucide-react";
+import { Heart, ArrowDownCircle, MoreHorizontal, Clock, Play, Pause, SkipBack, SkipForward } from "lucide-react";
+
+const PLACEHOLDER_IMAGES = [
+  "https://images.unsplash.com/photo-1676047871081-733dc414cbac?w=600&h=400&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1699762707215-9f5bea5f6179?w=600&h=400&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1763741218869-c36c3d6b3227?w=600&h=400&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1725357599001-00709d50d32e?w=600&h=400&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1593407741958-59550f282621?w=600&h=400&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1780402373446-e9884cab0bcd?w=600&h=400&fit=crop&auto=format",
+];
 
 // Film sprocket hole component
 function Sprocket({ count = 8 }: { count?: number }) {
@@ -47,7 +56,7 @@ export function TimelineSection() {
   const [activeTab, setActiveTab] = useState<"content" | "album">("content");
   const [likedPeriods, setLikedPeriods] = useState<Record<number, boolean>>({});
 
-  const { currentTrack, isPlaying, playTrack, togglePlay } = usePlayer();
+  const { currentTrack, isPlaying, playTrack, togglePlay, progress, nextTrack, prevTrack } = usePlayer();
   const period = PERIODS[active];
 
   const toggleLike = (id: number) => {
@@ -74,20 +83,25 @@ export function TimelineSection() {
   const isCurrentPeriodPlaying = isPlaying && currentTrack.periodId === period.id;
 
   return (
-    <section className="bg-[#0D0D0D] py-24 overflow-hidden">
+    <section className="bg-[#F5F1E8] md:bg-[#0D0D0D] py-16 md:py-24 overflow-hidden relative">
+      {/* Mobile Grain Background */}
+      <div className="md:hidden">
+        <Grain opacity={0.05} />
+      </div>
+
       {/* Header */}
-      <div className="px-6 max-w-7xl mx-auto mb-16">
+      <div className="px-6 max-w-7xl mx-auto mb-10 md:mb-16 relative z-10">
         <div className="flex items-center gap-6 mb-6">
           <div className="w-2 h-8 bg-[#8B0000]" />
           <p
-            className="text-[#6B5F4E]"
+            className="text-[#8B0000] md:text-[#6B5F4E]"
             style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.65rem", letterSpacing: "0.3em", textTransform: "uppercase" }}
           >
             Dòng chảy lịch sử
           </p>
         </div>
         <h2
-          className="text-[#F5F1E8]"
+          className="text-[#1A1A1A] md:text-[#F5F1E8]"
           style={{
             fontFamily: "'Fraunces', serif",
             fontSize: "clamp(2.2rem, 4vw, 3.8rem)",
@@ -98,27 +112,27 @@ export function TimelineSection() {
         >
           Âm nhạc Việt Nam
           <br />
-          <em className="text-[#C2A47E]" style={{ fontWeight: 400, fontVariationSettings: "'opsz' 144" }}>
+          <em className="text-[#8B0000] md:text-[#C2A47E]" style={{ fontWeight: 400, fontVariationSettings: "'opsz' 144" }}>
             qua từng thời đại
           </em>
         </h2>
       </div>
 
       {/* Film strip layout */}
-      <div className="flex">
+      <div className="flex flex-col md:flex-row">
         {/* Left sprocket strip */}
         <div
-          className="flex-shrink-0 w-10 flex flex-col items-center py-4 relative"
+          className="hidden md:flex flex-shrink-0 w-10 flex-col items-center py-4 relative"
           style={{ backgroundColor: "#1A1A1A", borderRight: "1px solid rgba(194,164,126,0.1)" }}
         >
           <Sprocket count={12} />
           <Grain opacity={0.1} />
         </div>
 
-        {/* Period selector — film frames */}
+        {/* Desktop Period selector — film frames */}
         <div
-          className="flex-shrink-0 overflow-y-auto"
-          style={{ width: "280px", backgroundColor: "#141414", scrollbarWidth: "none" }}
+          className="hidden md:flex flex-shrink-0 overflow-y-auto overflow-x-hidden flex-col w-[280px]"
+          style={{ backgroundColor: "#141414", scrollbarWidth: "none" }}
         >
           {PERIODS.map((p, i) => (
             <button
@@ -128,9 +142,12 @@ export function TimelineSection() {
               style={{
                 padding: "1.25rem 1.5rem",
                 backgroundColor: i === active ? "#1E1E1E" : "transparent",
-                borderLeft: i === active ? `3px solid ${p.color}` : "3px solid transparent",
               }}
             >
+              <div 
+                className={`absolute inset-y-0 left-0 w-[3px] transition-colors ${i === active ? 'bg-current' : 'bg-transparent'}`} 
+                style={{ color: p.color }} 
+              />
               {/* Frame number */}
               <div
                 className="absolute top-3 right-4 opacity-20"
@@ -169,9 +186,126 @@ export function TimelineSection() {
           ))}
         </div>
 
+        {/* Mobile Period selector — vertical timeline new design */}
+        <div className="md:hidden flex flex-col w-full relative z-10">
+          <div className="relative flex">
+            {/* Left film strip background */}
+            <div className="absolute top-0 bottom-0 left-0 w-24 flex justify-center z-0">
+              <div className="w-8 bg-[#E5DCC5]/60 border-x border-[#C2A47E]/30 flex flex-col py-2 overflow-hidden shadow-inner relative">
+                {/* decorative transparency note */}
+                <div className="absolute -right-4 top-8 text-[#6B5F4E]/60 whitespace-nowrap -rotate-90 origin-bottom-left" style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem" }}>
+                  Transparency 90%
+                </div>
+                {Array.from({ length: 40 }).map((_, i) => (
+                  <div key={i} className="w-full flex justify-between px-1 my-[6px]">
+                    <div className="w-[3px] h-[5px] rounded-sm bg-[#F5F1E8]/80 shadow-inner" />
+                    <div className="w-[3px] h-[5px] rounded-sm bg-[#F5F1E8]/80 shadow-inner" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Cards column */}
+            <div className="flex flex-col gap-10 w-full relative pt-4 pb-12 z-10">
+              {PERIODS.map((p, i) => {
+                const isCurrent = currentTrack.periodId === p.id;
+                
+                // Extra decorative caveat texts for some items based on index
+                let extraText = null;
+                if (i === 0) extraText = <div className="absolute top-20 left-2 text-[#1A1A1A] whitespace-nowrap" style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem" }}>Caveat</div>;
+                if (i === 1) extraText = <div className="absolute top-20 left-2 text-[#1A1A1A] whitespace-nowrap" style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem" }}>Fraunce</div>;
+                if (i === 2) extraText = <div className="absolute top-20 left-2 text-[#1A1A1A] whitespace-nowrap" style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem" }}>Cavences</div>;
+                if (i === 3) extraText = <div className="absolute top-6 right-2 text-[#1A1A1A] whitespace-nowrap" style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem" }}>← Hồi ức...</div>;
+                if (i === 4) extraText = <div className="absolute top-6 right-2 text-[#1A1A1A] whitespace-nowrap" style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem" }}>← Nét xưa...</div>;
+                if (i === 5) extraText = <div className="absolute bottom-4 right-2 text-[#1A1A1A] whitespace-nowrap" style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem" }}>Băng cũ kỹ</div>;
+
+                return (
+                  <div key={p.id} className="flex w-full items-start relative">
+                    {extraText}
+
+                    {/* Badge container - fixed width to center over the film strip */}
+                    <div className="w-24 flex-shrink-0 flex justify-center pt-2">
+                      <div className="w-16 h-16 rounded-full bg-[#F5F1E8] shadow-[0_4px_12px_rgba(0,0,0,0.15)] p-1 flex items-center justify-center border border-[#C2A47E]/40 z-10 relative">
+                        {/* Zigzag/Scalloped simple approximation via dashed border inner */}
+                        <div className="w-full h-full rounded-full flex flex-col items-center justify-center border-[2px] border-dashed border-white/80" style={{ backgroundColor: p.color }}>
+                          <span className="text-white font-bold text-sm leading-none mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            {p.years.split(' – ')[0]}
+                          </span>
+                          <span className="text-white text-[8px] uppercase mt-[3px] text-center px-1 leading-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            {p.label.split(' ')[0]}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card container */}
+                    <div className="flex-1 pr-4 flex relative pt-2">
+                      {/* Pointer Triangle */}
+                      <div className="absolute top-[22px] -left-[11px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[12px]" style={{ borderRightColor: p.color }} />
+                      
+                      {/* Card Body */}
+                      <div className="flex-1 rounded-2xl shadow-lg flex flex-col overflow-hidden" style={{ backgroundColor: p.color }}>
+                        {/* Card Image */}
+                        <div className="p-2">
+                          <div className="w-full h-32 md:h-40 bg-black/20 rounded-xl overflow-hidden relative">
+                            <img src={PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length]} className="w-full h-full object-cover mix-blend-luminosity opacity-90" alt={p.label} />
+                            {/* vintage overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
+                          </div>
+                        </div>
+                        
+                        {/* Card Content */}
+                        <div className="px-3 pb-4 flex flex-col gap-1.5">
+                          <h3 className="text-[#F5F1E8] font-bold text-sm uppercase tracking-wide leading-tight line-clamp-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            {p.label}
+                          </h3>
+                          <p className="text-white/85 text-xs leading-snug line-clamp-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            {p.body}
+                          </p>
+                          <p className="text-[#C2A47E] text-[10px] italic mt-1 line-clamp-1 opacity-80 font-medium">
+                            Notes: {p.detail}
+                          </p>
+                          
+                          {/* Mini Player */}
+                          <div className="mt-3 pt-3 flex items-center gap-2">
+                            <div 
+                              className="w-7 h-7 rounded-full bg-[#1DB954] flex items-center justify-center shrink-0 shadow-sm cursor-pointer" 
+                              onClick={() => playTrack(p.songs[0], p.id)}
+                            >
+                              {isCurrent && isPlaying ? (
+                                <Pause className="w-3.5 h-3.5 text-black fill-black" />
+                              ) : (
+                                <Play className="w-3.5 h-3.5 text-black fill-black ml-0.5" />
+                              )}
+                            </div>
+                            <div className="flex-1 h-1 bg-black/40 rounded-full overflow-hidden relative">
+                              <div className="absolute top-0 left-0 bottom-0 bg-[#1DB954] rounded-full" style={{ width: isCurrent ? `${progress}%` : '0%' }} />
+                            </div>
+                            <div className="flex items-center gap-2 text-[#C2A47E] opacity-70">
+                              <SkipBack className="w-4 h-4 fill-current cursor-pointer" onClick={() => prevTrack()} />
+                              {isCurrent && isPlaying ? (
+                                <Pause className="w-5 h-5 fill-current cursor-pointer" onClick={() => togglePlay()} />
+                              ) : (
+                                <Play className="w-5 h-5 fill-current cursor-pointer" onClick={() => {
+                                  if (isCurrent) togglePlay(); else playTrack(p.songs[0], p.id);
+                                }} />
+                              )}
+                              <SkipForward className="w-4 h-4 fill-current cursor-pointer" onClick={() => nextTrack()} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         {/* Right sprocket strip */}
         <div
-          className="flex-shrink-0 w-10 flex flex-col items-center py-4 relative"
+          className="hidden md:flex flex-shrink-0 w-10 flex-col items-center py-4 relative"
           style={{ backgroundColor: "#1A1A1A", borderRight: "1px solid rgba(194,164,126,0.1)" }}
         >
           <Sprocket count={12} />
@@ -179,7 +313,7 @@ export function TimelineSection() {
         </div>
 
         {/* Detail panel */}
-        <div className="flex-1 px-6 md:px-10 py-8 min-w-0">
+        <div className="hidden md:block flex-1 px-4 md:px-10 py-6 md:py-8 min-w-0">
           {/* Tab Switcher */}
           <div className="flex items-center gap-6 mb-8 border-b border-[rgba(194,164,126,0.1)] pb-3 select-none">
             <button

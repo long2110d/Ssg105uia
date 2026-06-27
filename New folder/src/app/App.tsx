@@ -11,6 +11,7 @@ import { SiteFooter } from "./components/SiteFooter";
 import { Grain } from "./components/Grain";
 import { PlayerProvider } from "./context/PlayerContext";
 import { MusicPlayerBar } from "./components/MusicPlayerBar";
+import { MusicDetailModal } from "./components/MusicDetailModal";
 import { StoryPage } from "./components/StoryPage";
 
 function RedQuoteBand() {
@@ -55,17 +56,7 @@ function RedQuoteBand() {
   );
 }
 
-export default function App() {
-  const [storyId, setStoryId] = useState<number | null>(null);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("story");
-    if (id) {
-      setStoryId(parseInt(id));
-    }
-  }, []);
-
+function AppContent({ storyId, setStoryId }: { storyId: number | null; setStoryId: (id: number | null) => void }) {
   if (storyId !== null) {
     return (
       <StoryPage
@@ -79,41 +70,57 @@ export default function App() {
   }
 
   return (
-    <PlayerProvider>
-      <div
-        className="min-h-screen pb-24"
-        style={{ backgroundColor: "#F5F1E8" }}
-      >
-        <SiteNav />
+    <div
+      className="min-h-screen pb-24"
+      style={{ backgroundColor: "#F5F1E8" }}
+    >
+      <SiteNav />
 
-        <main>
-          <section id="hero">
-            <HeroSection />
-          </section>
+      <main>
+        <section id="hero">
+          <HeroSection />
+        </section>
 
-          <section id="stories">
-            <StoryCards />
-          </section>
+        <section id="stories">
+          <StoryCards />
+        </section>
 
-          <RedQuoteBand />
+        <RedQuoteBand />
 
-          <section id="timeline">
-            <TimelineSection />
-          </section>
+        <section id="timeline">
+          <TimelineSection />
+        </section>
 
-          <section id="videos">
-            <VideoSection />
-          </section>
+        <section id="videos">
+          <VideoSection />
+        </section>
 
-          <section id="memories">
-            <MemoryWall />
-          </section>
-        </main>
+        <section id="memories">
+          <MemoryWall />
+        </section>
+      </main>
 
-        <SiteFooter />
-        <MusicPlayerBar />
-      </div>
-    </PlayerProvider>
+      <SiteFooter />
+      <MusicPlayerBar />
+      <MusicDetailModal />
+    </div>
   );
 }
 
+export default function App() {
+  const [storyId, setStoryId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("story");
+    if (id) {
+      setStoryId(parseInt(id));
+    }
+  }, []);
+
+  return (
+    <PlayerProvider>
+      <AppContent storyId={storyId} setStoryId={setStoryId} />
+    </PlayerProvider>
+  );
+}
