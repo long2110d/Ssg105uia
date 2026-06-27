@@ -4,7 +4,7 @@ import { Grain, Scanlines, filmFilter } from "./Grain";
 // Hero: split-canvas editorial — left panel solid red with nav/text, right panel cinematic photo
 const HERO_PHOTO = "https://images.unsplash.com/photo-1676047871081-733dc414cbac?w=1400&h=900&fit=crop&auto=format";
 
-const ticker = "Diễm Xưa · Phượng Hồng · Hoa Sữa · Nối Vòng Tay Lớn · Một Mình · Gia Tài Của Mẹ · Hà Nội Mùa Vắng · Bụi Bay Vào Mắt · ";
+const ticker = "Khúc nhạc \"Long Ngâm\" · Điệu \"Trống Cơm\" · Giã bạn · Tiến quân ca · Hướng về Hà Nội · Ai yêu Bác Hồ Chí Minh hơn thiếu niên nhi đồng · Như Có Bác Trong Ngày Vui Đại Thắng · Trường Sơn Đông, Trường Sơn Tây · Nối Vòng Tay Lớn · Mùa Xuân Trên Thành Phố Hồ Chí Minh · Hà Nội mùa này vắng những cơn mưa · Thương Về Miền Trung · Việt Nam ơi · Thịnh vượng Việt Nam sáng ngời · Dòng sông ta về đây · ";
 
 export function HeroSection() {
   return (
