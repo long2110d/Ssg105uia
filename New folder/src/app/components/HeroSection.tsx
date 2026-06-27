@@ -18,7 +18,7 @@ export function HeroSection() {
         <motion.div
           className="flex whitespace-nowrap gap-0"
           animate={{ x: ["0%", "-50%"] }}
-          transition={{ repeat: Infinity, duration: 28, ease: "linear" }}
+          transition={{ repeat: Infinity, duration: 120, ease: "linear" }}
           style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: "0.65rem",
