@@ -46,21 +46,68 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [activePeriodId, setActivePeriodId] = useState<number>(1);
   const [hasPlayed, setHasPlayed] = useState<boolean>(false);
   const timerRef = useRef<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const duration = currentTrack.duration;
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
   const deviceConnected = "BEATSPILL+";
 
-  // Handle timer simulation for playing audio
+  // Initialize audio element once
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      audioRef.current = new Audio();
+      audioRef.current.addEventListener("ended", () => {
+        nextTrack();
+      });
+    }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+    };
+  }, []);
+
+  // Update audio source when track changes
+  useEffect(() => {
+    if (audioRef.current) {
+      if (currentTrack.audioUrl) {
+        audioRef.current.src = currentTrack.audioUrl;
+        audioRef.current.currentTime = 0;
+        if (isPlaying) {
+          audioRef.current.play().catch(console.error);
+        }
+      } else {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+    }
+  }, [currentTrack]);
+
+  // Handle play/pause for actual audio
+  useEffect(() => {
+    if (audioRef.current && currentTrack.audioUrl) {
+      if (isPlaying) {
+        audioRef.current.play().catch(console.error);
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isPlaying]);
+
+  // Handle timer simulation (for both real audio and simulated audio to keep UI in sync)
   useEffect(() => {
     if (isPlaying) {
       // Tick every 1 second
       timerRef.current = window.setInterval(() => {
         setCurrentTime((prev) => {
+          // If we have real audio, sync time with it
+          if (audioRef.current && currentTrack.audioUrl) {
+            return audioRef.current.currentTime;
+          }
+          // Otherwise, simulate time
           if (prev >= duration - 1) {
-            // Track finished - play next track
             clearInterval(timerRef.current!);
-            // Handle transition asynchronously to prevent state update cycle issues
             setTimeout(() => {
               nextTrack();
             }, 0);
@@ -73,6 +120,10 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
+      // Keep UI synced even when paused if we have real audio
+      if (audioRef.current && currentTrack.audioUrl) {
+        setCurrentTime(audioRef.current.currentTime);
+      }
     }
 
     return () => {
@@ -80,7 +131,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         clearInterval(timerRef.current);
       }
     };
-  }, [isPlaying, currentTrack]);
+  }, [isPlaying, currentTrack, duration]);
 
   // Sync active period id with current track
   useEffect(() => {
@@ -133,7 +184,10 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const seek = (percentage: number) => {
-    const newTime = Math.max(0, Math.min(duration, Math.round((percentage / 100) * duration)));
+    const newTime = Math.max(0, Math.min(duration, (percentage / 100) * duration));
+    if (audioRef.current && currentTrack.audioUrl) {
+      audioRef.current.currentTime = newTime;
+    }
     setCurrentTime(newTime);
   };
 

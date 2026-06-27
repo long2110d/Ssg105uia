@@ -98,12 +98,6 @@ function StorySmall({ story, index, onClick }: { story: typeof STORIES[0]; index
         >
           {story.desc}
         </p>
-        <p
-          className="mt-2 text-[#C2A47E]"
-          style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.62rem", letterSpacing: "0.1em" }}
-        >
-          {story.readTime}
-        </p>
       </div>
 
       <ArrowUpRight
@@ -116,7 +110,8 @@ function StorySmall({ story, index, onClick }: { story: typeof STORIES[0]; index
 
 export function StoryCards() {
   const handleCardClick = (id: number) => {
-    window.open(`/?story=${id}`, "_blank");
+    window.history.pushState({}, "", `/?story=${id}`);
+    window.dispatchEvent(new PopStateEvent("popstate"));
   };
 
   return (
@@ -224,15 +219,6 @@ export function StoryCards() {
                 >
                   {FEATURE.desc}
                 </p>
-                <div className="flex items-center gap-4">
-                  <div className="h-px flex-1 bg-[rgba(26,26,26,0.1)]" />
-                  <span
-                    className="text-[#6B5F4E]"
-                    style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase" }}
-                  >
-                    {FEATURE.readTime}
-                  </span>
-                </div>
               </div>
             </div>
           </motion.article>

@@ -52,14 +52,14 @@ export function VideoSection() {
           <div className="flex-1 h-px bg-[rgba(26,26,26,0.1)]" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 md:gap-3">
           {/* Left: large featured video */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="lg:row-span-2"
+            className="lg:row-span-2 flex flex-col min-h-[300px]"
           >
             <VideoCard video={VIDEOS[0]} large onPlay={setActive} />
           </motion.div>
@@ -72,6 +72,7 @@ export function VideoSection() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.15 }}
+              className="flex flex-col aspect-video"
             >
               <VideoCard video={video} large={false} onPlay={setActive} />
             </motion.div>
@@ -89,7 +90,7 @@ export function VideoSection() {
           <p
             className="text-[#6B5F4E] mx-auto"
             style={{
-              fontFamily: "'Caveat', cursive",
+              fontFamily: "'Dancing Script', cursive",
               fontSize: "clamp(1.4rem, 2.5vw, 2rem)",
               maxWidth: "600px",
               lineHeight: 1.5,
@@ -164,8 +165,7 @@ function VideoCard({ video, large, onPlay }: { video: typeof VIDEOS[0]; large: b
   const [hovered, setHovered] = useState(false);
   return (
     <div
-      className="relative group cursor-pointer bg-[#1A0A00] overflow-hidden"
-      style={{ aspectRatio: large ? "4/3" : "16/9", height: "100%" }}
+      className="relative group cursor-pointer bg-[#1A0A00] overflow-hidden w-full h-full flex-1"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={() => onPlay(video.id)}

@@ -15,6 +15,11 @@ export const StoryPage: React.FC<StoryPageProps> = ({ id, onClose }) => {
   const allStories = [FEATURE, ...STORIES];
   const story = allStories.find((s) => s.id === id) || FEATURE;
 
+  // Scroll to top when opening a story
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
+
   // Rich historical narrative text for each story
   const narratives: Record<number, { paragraphs: string[]; quote: string }> = {
     1: {
@@ -78,7 +83,7 @@ export const StoryPage: React.FC<StoryPageProps> = ({ id, onClose }) => {
 
           <span
             className="text-[#C2A47E] italic"
-            style={{ fontFamily: "'Caveat', cursive", fontSize: "1.4rem" }}
+            style={{ fontFamily: "'Dancing Script', cursive", fontSize: "1.4rem" }}
           >
             nhạc ký ức Việt
           </span>
@@ -206,13 +211,6 @@ export const StoryPage: React.FC<StoryPageProps> = ({ id, onClose }) => {
           >
             Quay lại Triển Lãm
           </button>
-          
-          <span
-            className="text-[10px] text-[#6B5F4E] font-semibold uppercase tracking-[0.25em]"
-            style={{ fontFamily: "'Inter', sans-serif" }}
-          >
-            Thời gian đọc: {story.readTime}
-          </span>
         </div>
       </main>
 

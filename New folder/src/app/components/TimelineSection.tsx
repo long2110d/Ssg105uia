@@ -83,7 +83,7 @@ export function TimelineSection() {
   const isCurrentPeriodPlaying = isPlaying && currentTrack.periodId === period.id;
 
   return (
-    <section className="bg-[#F5F1E8] md:bg-[#0D0D0D] py-16 md:py-24 overflow-hidden relative">
+    <section className="bg-[#0D0D0D] py-16 md:py-24 overflow-hidden relative">
       {/* Mobile Grain Background */}
       <div className="md:hidden">
         <Grain opacity={0.05} />
@@ -94,14 +94,14 @@ export function TimelineSection() {
         <div className="flex items-center gap-6 mb-6">
           <div className="w-2 h-8 bg-[#8B0000]" />
           <p
-            className="text-[#8B0000] md:text-[#6B5F4E]"
+            className="text-[#6B5F4E]"
             style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.65rem", letterSpacing: "0.3em", textTransform: "uppercase" }}
           >
             Dòng chảy lịch sử
           </p>
         </div>
         <h2
-          className="text-[#1A1A1A] md:text-[#F5F1E8]"
+          className="text-[#F5F1E8]"
           style={{
             fontFamily: "'Fraunces', serif",
             fontSize: "clamp(2.2rem, 4vw, 3.8rem)",
@@ -112,7 +112,7 @@ export function TimelineSection() {
         >
           Âm nhạc Việt Nam
           <br />
-          <em className="text-[#8B0000] md:text-[#C2A47E]" style={{ fontWeight: 400, fontVariationSettings: "'opsz' 144" }}>
+          <em className="text-[#C2A47E]" style={{ fontWeight: 400, fontVariationSettings: "'opsz' 144" }}>
             qua từng thời đại
           </em>
         </h2>
@@ -186,121 +186,57 @@ export function TimelineSection() {
           ))}
         </div>
 
-        {/* Mobile Period selector — vertical timeline new design */}
-        <div className="md:hidden flex flex-col w-full relative z-10">
-          <div className="relative flex">
-            {/* Left film strip background */}
-            <div className="absolute top-0 bottom-0 left-0 w-24 flex justify-center z-0">
-              <div className="w-8 bg-[#E5DCC5]/60 border-x border-[#C2A47E]/30 flex flex-col py-2 overflow-hidden shadow-inner relative">
-                {/* decorative transparency note */}
-                <div className="absolute -right-4 top-8 text-[#6B5F4E]/60 whitespace-nowrap -rotate-90 origin-bottom-left" style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem" }}>
-                  Transparency 90%
-                </div>
-                {Array.from({ length: 40 }).map((_, i) => (
-                  <div key={i} className="w-full flex justify-between px-1 my-[6px]">
-                    <div className="w-[3px] h-[5px] rounded-sm bg-[#F5F1E8]/80 shadow-inner" />
-                    <div className="w-[3px] h-[5px] rounded-sm bg-[#F5F1E8]/80 shadow-inner" />
-                  </div>
-                ))}
+        {/* Mobile Period selector — horizontal carousel */}
+        <div 
+          className="md:hidden w-full overflow-x-auto flex flex-nowrap border-b border-[rgba(194,164,126,0.1)] mb-4 [&::-webkit-scrollbar]:hidden" 
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {PERIODS.map((p, i) => (
+            <button
+              key={p.id}
+              onClick={() => setActive(i)}
+              className="flex-shrink-0 text-left relative px-5 py-4 transition-colors border-r border-[rgba(194,164,126,0.05)]"
+              style={{ backgroundColor: i === active ? "rgba(30,30,30,0.5)" : "transparent" }}
+            >
+              <div 
+                className={`absolute bottom-0 left-0 right-0 h-[2px] transition-colors ${i === active ? 'bg-current' : 'bg-transparent'}`} 
+                style={{ color: p.color }} 
+              />
+              <div
+                className="absolute top-2 right-3 opacity-10"
+                style={{ fontFamily: "'Fraunces', serif", fontSize: "1.4rem", fontWeight: 900, color: "#C2A47E", lineHeight: 1 }}
+              >
+                {p.frame}
               </div>
-            </div>
-
-            {/* Cards column */}
-            <div className="flex flex-col gap-10 w-full relative pt-4 pb-12 z-10">
-              {PERIODS.map((p, i) => {
-                const isCurrent = currentTrack.periodId === p.id;
-                
-                // Extra decorative caveat texts for some items based on index
-                let extraText = null;
-                if (i === 0) extraText = <div className="absolute top-20 left-2 text-[#1A1A1A] whitespace-nowrap" style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem" }}>Caveat</div>;
-                if (i === 1) extraText = <div className="absolute top-20 left-2 text-[#1A1A1A] whitespace-nowrap" style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem" }}>Fraunce</div>;
-                if (i === 2) extraText = <div className="absolute top-20 left-2 text-[#1A1A1A] whitespace-nowrap" style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem" }}>Cavences</div>;
-                if (i === 3) extraText = <div className="absolute top-6 right-2 text-[#1A1A1A] whitespace-nowrap" style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem" }}>← Hồi ức...</div>;
-                if (i === 4) extraText = <div className="absolute top-6 right-2 text-[#1A1A1A] whitespace-nowrap" style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem" }}>← Nét xưa...</div>;
-                if (i === 5) extraText = <div className="absolute bottom-4 right-2 text-[#1A1A1A] whitespace-nowrap" style={{ fontFamily: "'Caveat', cursive", fontSize: "1.2rem" }}>Băng cũ kỹ</div>;
-
-                return (
-                  <div key={p.id} className="flex w-full items-start relative">
-                    {extraText}
-
-                    {/* Badge container - fixed width to center over the film strip */}
-                    <div className="w-24 flex-shrink-0 flex justify-center pt-2">
-                      <div className="w-16 h-16 rounded-full bg-[#F5F1E8] shadow-[0_4px_12px_rgba(0,0,0,0.15)] p-1 flex items-center justify-center border border-[#C2A47E]/40 z-10 relative">
-                        {/* Zigzag/Scalloped simple approximation via dashed border inner */}
-                        <div className="w-full h-full rounded-full flex flex-col items-center justify-center border-[2px] border-dashed border-white/80" style={{ backgroundColor: p.color }}>
-                          <span className="text-white font-bold text-sm leading-none mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            {p.years.split(' – ')[0]}
-                          </span>
-                          <span className="text-white text-[8px] uppercase mt-[3px] text-center px-1 leading-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            {p.label.split(' ')[0]}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Card container */}
-                    <div className="flex-1 pr-4 flex relative pt-2">
-                      {/* Pointer Triangle */}
-                      <div className="absolute top-[22px] -left-[11px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[12px]" style={{ borderRightColor: p.color }} />
-                      
-                      {/* Card Body */}
-                      <div className="flex-1 rounded-2xl shadow-lg flex flex-col overflow-hidden" style={{ backgroundColor: p.color }}>
-                        {/* Card Image */}
-                        <div className="p-2">
-                          <div className="w-full h-32 md:h-40 bg-black/20 rounded-xl overflow-hidden relative">
-                            <img src={PLACEHOLDER_IMAGES[i % PLACEHOLDER_IMAGES.length]} className="w-full h-full object-cover mix-blend-luminosity opacity-90" alt={p.label} />
-                            {/* vintage overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/10" />
-                          </div>
-                        </div>
-                        
-                        {/* Card Content */}
-                        <div className="px-3 pb-4 flex flex-col gap-1.5">
-                          <h3 className="text-[#F5F1E8] font-bold text-sm uppercase tracking-wide leading-tight line-clamp-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            {p.label}
-                          </h3>
-                          <p className="text-white/85 text-xs leading-snug line-clamp-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            {p.body}
-                          </p>
-                          <p className="text-[#C2A47E] text-[10px] italic mt-1 line-clamp-1 opacity-80 font-medium">
-                            Notes: {p.detail}
-                          </p>
-                          
-                          {/* Mini Player */}
-                          <div className="mt-3 pt-3 flex items-center gap-2">
-                            <div 
-                              className="w-7 h-7 rounded-full bg-[#1DB954] flex items-center justify-center shrink-0 shadow-sm cursor-pointer" 
-                              onClick={() => playTrack(p.songs[0], p.id)}
-                            >
-                              {isCurrent && isPlaying ? (
-                                <Pause className="w-3.5 h-3.5 text-black fill-black" />
-                              ) : (
-                                <Play className="w-3.5 h-3.5 text-black fill-black ml-0.5" />
-                              )}
-                            </div>
-                            <div className="flex-1 h-1 bg-black/40 rounded-full overflow-hidden relative">
-                              <div className="absolute top-0 left-0 bottom-0 bg-[#1DB954] rounded-full" style={{ width: isCurrent ? `${progress}%` : '0%' }} />
-                            </div>
-                            <div className="flex items-center gap-2 text-[#C2A47E] opacity-70">
-                              <SkipBack className="w-4 h-4 fill-current cursor-pointer" onClick={() => prevTrack()} />
-                              {isCurrent && isPlaying ? (
-                                <Pause className="w-5 h-5 fill-current cursor-pointer" onClick={() => togglePlay()} />
-                              ) : (
-                                <Play className="w-5 h-5 fill-current cursor-pointer" onClick={() => {
-                                  if (isCurrent) togglePlay(); else playTrack(p.songs[0], p.id);
-                                }} />
-                              )}
-                              <SkipForward className="w-4 h-4 fill-current cursor-pointer" onClick={() => nextTrack()} />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+              <p
+                className="mb-1 relative z-10"
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  color: i === active ? "#C2A47E" : "#8A8A8A",
+                  transition: "color 0.2s",
+                }}
+              >
+                {p.years}
+              </p>
+              <p
+                className="relative z-10"
+                style={{
+                  fontFamily: "'Fraunces', serif",
+                  fontSize: "1rem",
+                  fontWeight: i === active ? 600 : 400,
+                  color: i === active ? "#F5F1E8" : "#8A8A8A",
+                  fontVariationSettings: "'opsz' 36",
+                  lineHeight: 1.3,
+                  transition: "color 0.2s",
+                }}
+              >
+                {p.label}
+              </p>
+            </button>
+          ))}
         </div>
 
         {/* Right sprocket strip */}
@@ -313,9 +249,9 @@ export function TimelineSection() {
         </div>
 
         {/* Detail panel */}
-        <div className="hidden md:block flex-1 px-4 md:px-10 py-6 md:py-8 min-w-0">
+        <div className="flex-1 px-4 md:px-10 py-2 md:py-8 min-w-0">
           {/* Tab Switcher */}
-          <div className="flex items-center gap-6 mb-8 border-b border-[rgba(194,164,126,0.1)] pb-3 select-none">
+          <div className="hidden md:flex items-center gap-6 mb-8 border-b border-[rgba(194,164,126,0.1)] pb-3 select-none">
             <button
               onClick={() => setActiveTab("content")}
               className="relative py-2 px-1 text-sm font-semibold tracking-wider uppercase transition-all duration-200 cursor-pointer"
@@ -600,22 +536,32 @@ export function TimelineSection() {
               )}
 
               {/* Nav arrows */}
-              <div className="flex gap-3 mt-10">
+              <div className="flex items-center justify-between mt-10">
                 <button
                   onClick={() => setActive(Math.max(0, active - 1))}
                   disabled={active === 0}
-                  className="px-5 py-2.5 border border-[rgba(194,164,126,0.2)] text-[#6B5F4E] hover:text-[#C2A47E] hover:border-[#C2A47E] transition-all disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
+                  className="px-4 py-2.5 border border-[rgba(194,164,126,0.2)] text-[#6B5F4E] hover:text-[#C2A47E] hover:border-[#C2A47E] transition-all disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
                   style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.65rem", letterSpacing: "0.18em", textTransform: "uppercase" }}
                 >
-                  ← Trước
+                  &lt; Trước
                 </button>
+                
+                <div className="flex items-center gap-2">
+                  {PERIODS.map((_, idx) => (
+                    <span 
+                      key={idx} 
+                      className={`block rounded-full transition-all duration-300 ${idx === active ? "w-5 h-1.5 bg-[#8B0000]" : "w-1.5 h-1.5 bg-[#4A4A4A]"}`} 
+                    />
+                  ))}
+                </div>
+
                 <button
                   onClick={() => setActive(Math.min(PERIODS.length - 1, active + 1))}
                   disabled={active === PERIODS.length - 1}
-                  className="px-5 py-2.5 border border-[rgba(194,164,126,0.2)] text-[#6B5F4E] hover:text-[#C2A47E] hover:border-[#C2A47E] transition-all disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
+                  className="px-4 py-2.5 border border-[rgba(194,164,126,0.2)] text-[#6B5F4E] hover:text-[#C2A47E] hover:border-[#C2A47E] transition-all disabled:opacity-20 disabled:pointer-events-none cursor-pointer"
                   style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.65rem", letterSpacing: "0.18em", textTransform: "uppercase" }}
                 >
-                  Tiếp →
+                  Tiếp &gt;
                 </button>
               </div>
             </motion.div>

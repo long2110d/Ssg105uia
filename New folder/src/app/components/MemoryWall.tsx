@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, X, Heart, PenLine } from "lucide-react";
+import confetti from "canvas-confetti";
 
 const PALETTE = [
   { bg: "#FFFBEB", accent: "#B45309", tape: "#D97706" },
@@ -73,7 +74,7 @@ function StickyNote({ note, liked, onLike }: { note: NoteData; liked: boolean; o
         {/* Handwritten text */}
         <p
           className="text-[#1A1A1A] leading-relaxed mb-4"
-          style={{ fontFamily: "'Caveat', cursive", fontSize: "1rem", lineHeight: 1.55 }}
+          style={{ fontFamily: "'Dancing Script', cursive", fontSize: "1rem", lineHeight: 1.55 }}
         >
           {note.text}
         </p>
@@ -107,6 +108,60 @@ export function MemoryWall() {
   const [liked, setLiked] = useState(new Set<number>());
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ author: "", city: "", text: "", song: "" });
+  const [highlight, setHighlight] = useState(false);
+  const writeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Listen for the custom event from HeroSection
+  useEffect(() => {
+    const handleOpenForm = () => {
+      // Highlight the button first
+      setHighlight(true);
+
+      // Fire confetti from the button position
+      if (writeButtonRef.current) {
+        const rect = writeButtonRef.current.getBoundingClientRect();
+        const x = (rect.left + rect.width / 2) / window.innerWidth;
+        const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+        // First burst - warm colors
+        confetti({
+          particleCount: 60,
+          spread: 80,
+          origin: { x, y },
+          colors: ["#8B0000", "#C2A47E", "#D97706", "#F5F1E8", "#BE185D"],
+          startVelocity: 30,
+          gravity: 0.8,
+          ticks: 120,
+          shapes: ["circle", "square"],
+          scalar: 0.9,
+        });
+
+        // Second burst - delayed sparkle
+        setTimeout(() => {
+          confetti({
+            particleCount: 30,
+            spread: 50,
+            origin: { x, y },
+            colors: ["#FFD700", "#FFA500", "#FF6347", "#C2A47E"],
+            startVelocity: 20,
+            gravity: 0.6,
+            ticks: 100,
+            shapes: ["circle"],
+            scalar: 0.6,
+          });
+        }, 200);
+      }
+
+      // Open form after a short delay
+      setTimeout(() => {
+        setShowForm(true);
+        setHighlight(false);
+      }, 600);
+    };
+
+    window.addEventListener("open-memory-form", handleOpenForm);
+    return () => window.removeEventListener("open-memory-form", handleOpenForm);
+  }, []);
 
   const toggleLike = useCallback((id: number) => {
     setLiked((prev) => {
@@ -157,9 +212,19 @@ export function MemoryWall() {
             </p>
           </div>
           <button
+            ref={writeButtonRef}
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#8B0000] text-[#F5F1E8] hover:bg-[#6B0000] transition-colors"
-            style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase" }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#8B0000] text-[#F5F1E8] hover:bg-[#6B0000] transition-all duration-300"
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: "0.7rem",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              ...(highlight ? {
+                boxShadow: "0 0 20px rgba(139,0,0,0.6), 0 0 40px rgba(194,164,126,0.4)",
+                transform: "scale(1.08)",
+              } : {}),
+            }}
           >
             <PenLine size={13} /> Viết ký ức
           </button>
@@ -175,7 +240,7 @@ export function MemoryWall() {
           </h2>
           <p
             className="text-[#6B5F4E]"
-            style={{ fontFamily: "'Caveat', cursive", fontSize: "1.3rem" }}
+            style={{ fontFamily: "'Dancing Script', cursive", fontSize: "1.3rem" }}
           >
             "Mỗi người một câu chuyện — mỗi bài hát một cuộc đời..."
           </p>
@@ -255,7 +320,7 @@ export function MemoryWall() {
                     onChange={(e) => setForm((f) => ({ ...f, text: e.target.value }))}
                     rows={4}
                     className="w-full bg-transparent border-b border-[#D97706]/30 pb-2 outline-none focus:border-[#B45309] text-[#1A1A1A] placeholder-[#C2A47E]/70 transition-colors resize-none"
-                    style={{ fontFamily: "'Caveat', cursive", fontSize: "1.05rem", lineHeight: 1.6 }}
+                    style={{ fontFamily: "'Dancing Script', cursive", fontSize: "1.05rem", lineHeight: 1.6 }}
                   />
                 </div>
 

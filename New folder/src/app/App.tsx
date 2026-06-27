@@ -62,8 +62,7 @@ function AppContent({ storyId, setStoryId }: { storyId: number | null; setStoryI
       <StoryPage
         id={storyId}
         onClose={() => {
-          window.history.replaceState({}, document.title, window.location.pathname);
-          setStoryId(null);
+          window.history.back();
         }}
       />
     );
@@ -111,11 +110,15 @@ export default function App() {
   const [storyId, setStoryId] = useState<number | null>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("story");
-    if (id) {
-      setStoryId(parseInt(id));
-    }
+    const syncStoryFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("story");
+      setStoryId(id ? parseInt(id) : null);
+    };
+
+    syncStoryFromUrl();
+    window.addEventListener("popstate", syncStoryFromUrl);
+    return () => window.removeEventListener("popstate", syncStoryFromUrl);
   }, []);
 
   return (

@@ -469,7 +469,7 @@ export const MusicDetailModal: React.FC = () => {
                 {/* Decorative retro vibes note signature */}
                 <div
                   className="text-right text-[#C2A47E]/40 italic pr-1 hidden sm:block select-none"
-                  style={{ fontFamily: "'Caveat', cursive", fontSize: "1.3rem" }}
+                  style={{ fontFamily: "'Dancing Script', cursive", fontSize: "1.3rem" }}
                 >
                   nhạc ký ức Việt
                 </div>
