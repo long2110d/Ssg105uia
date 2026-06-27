@@ -1,7 +1,20 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Plus, X, Heart, PenLine } from "lucide-react";
+import { Plus, X, Heart, PenLine, Loader2 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { db } from "../firebase";
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  doc,
+  updateDoc,
+  increment,
+  query,
+  orderBy,
+  serverTimestamp,
+  type Timestamp,
+} from "firebase/firestore";
 
 const PALETTE = [
   { bg: "#FFFBEB", accent: "#B45309", tape: "#D97706" },
@@ -13,7 +26,7 @@ const PALETTE = [
 ];
 
 interface NoteData {
-  id: number;
+  id: string;
   author: string;
   city: string;
   text: string;
@@ -23,14 +36,26 @@ interface NoteData {
   likes: number;
 }
 
+// Firestore document shape
+interface FirestoreNote {
+  author: string;
+  city: string;
+  text: string;
+  song: string;
+  paletteIndex: number;
+  rotate: number;
+  likes: number;
+  createdAt: Timestamp | null;
+}
+
 const SEED_NOTES: NoteData[] = [
-  { id: 1, author: "Nguyễn Minh Châu", city: "Hà Nội", text: "Mỗi lần nghe Diễm Xưa là tôi lại nhớ đến mùa hè năm 16 tuổi, khi ba tôi ngồi hát cho cả nhà nghe trên chiếc radio cũ bên hiên nhà...", song: "Diễm Xưa", palette: PALETTE[0], rotate: -2.5, likes: 47 },
-  { id: 2, author: "Trần Bảo Ngọc", city: "Sài Gòn", text: "Phượng Hồng làm tôi nhớ năm lớp 12 — những buổi chiều chia tay bạn bè trước khi mỗi người một ngả. Âm nhạc là sợi dây duy nhất còn nối chúng tôi.", song: "Phượng Hồng", palette: PALETTE[1], rotate: 1.8, likes: 83 },
-  { id: 3, author: "Lê Hoàng Anh", city: "Đà Nẵng", text: "Ông nội tôi là nhạc sĩ thời kháng chiến. Ông thường nói: 'Âm nhạc là thứ duy nhất không thể bị chiếm đóng.'", song: "Hà Nội Mùa Thu", palette: PALETTE[2], rotate: -1.2, likes: 112 },
-  { id: 4, author: "Phạm Quỳnh Trang", city: "Huế", text: "Mẹ tôi hát ru bằng những bài bolero miền Nam. Bây giờ mỗi khi nghe lại, tôi cảm giác như được về nhà dù đang ở bất cứ đâu trên thế giới.", song: "Nỗi Buồn Hoa Phượng", palette: PALETTE[3], rotate: 2.2, likes: 65 },
-  { id: 5, author: "Vũ Đức Hải", city: "Hải Phòng", text: "Ngày bố tôi đi xa, ông để lại một cuộn băng cassette những bài hát ông yêu. Đó là kho báu lớn nhất tôi có trong đời.", song: "Một Đời Người", palette: PALETTE[4], rotate: -2, likes: 94 },
-  { id: 6, author: "Ngô Thanh Hương", city: "Cần Thơ", text: "Nhạc vàng miền Nam chứa cả một thế hệ sống trong xa cách và nhớ nhung. Nghe mà thấy lòng mình được thấu hiểu.", song: "Hoa Sứ Nhà Nàng", palette: PALETTE[5], rotate: 1, likes: 78 },
-  { id: 7, author: "Bùi Thanh Tùng", city: "Hồ Chí Minh", text: "Hoa Sữa gắn với đêm Hà Nội mùa thu — mùi hương ấy và giai điệu ấy là một. Tôi ở Sài Gòn nhưng nghe là nhớ đến Hà Nội lạ lắm.", song: "Hoa Sữa", palette: PALETTE[0], rotate: -1.5, likes: 59 },
+  { id: "seed-1", author: "Nguyễn Minh Châu", city: "Hà Nội", text: "Mỗi lần nghe Diễm Xưa là tôi lại nhớ đến mùa hè năm 16 tuổi, khi ba tôi ngồi hát cho cả nhà nghe trên chiếc radio cũ bên hiên nhà...", song: "Diễm Xưa", palette: PALETTE[0], rotate: -2.5, likes: 47 },
+  { id: "seed-2", author: "Trần Bảo Ngọc", city: "Sài Gòn", text: "Phượng Hồng làm tôi nhớ năm lớp 12 — những buổi chiều chia tay bạn bè trước khi mỗi người một ngả. Âm nhạc là sợi dây duy nhất còn nối chúng tôi.", song: "Phượng Hồng", palette: PALETTE[1], rotate: 1.8, likes: 83 },
+  { id: "seed-3", author: "Lê Hoàng Anh", city: "Đà Nẵng", text: "Ông nội tôi là nhạc sĩ thời kháng chiến. Ông thường nói: 'Âm nhạc là thứ duy nhất không thể bị chiếm đóng.'", song: "Hà Nội Mùa Thu", palette: PALETTE[2], rotate: -1.2, likes: 112 },
+  { id: "seed-4", author: "Phạm Quỳnh Trang", city: "Huế", text: "Mẹ tôi hát ru bằng những bài bolero miền Nam. Bây giờ mỗi khi nghe lại, tôi cảm giác như được về nhà dù đang ở bất cứ đâu trên thế giới.", song: "Nỗi Buồn Hoa Phượng", palette: PALETTE[3], rotate: 2.2, likes: 65 },
+  { id: "seed-5", author: "Vũ Đức Hải", city: "Hải Phòng", text: "Ngày bố tôi đi xa, ông để lại một cuộn băng cassette những bài hát ông yêu. Đó là kho báu lớn nhất tôi có trong đời.", song: "Một Đời Người", palette: PALETTE[4], rotate: -2, likes: 94 },
+  { id: "seed-6", author: "Ngô Thanh Hương", city: "Cần Thơ", text: "Nhạc vàng miền Nam chứa cả một thế hệ sống trong xa cách và nhớ nhung. Nghe mà thấy lòng mình được thấu hiểu.", song: "Hoa Sứ Nhà Nàng", palette: PALETTE[5], rotate: 1, likes: 78 },
+  { id: "seed-7", author: "Bùi Thanh Tùng", city: "Hồ Chí Minh", text: "Hoa Sữa gắn với đêm Hà Nội mùa thu — mùi hương ấy và giai điệu ấy là một. Tôi ở Sài Gòn nhưng nghe là nhớ đến Hà Nội lạ lắm.", song: "Hoa Sữa", palette: PALETTE[0], rotate: -1.5, likes: 59 },
 ];
 
 function StickyNote({ note, liked, onLike }: { note: NoteData; liked: boolean; onLike: () => void }) {
@@ -105,11 +130,74 @@ function StickyNote({ note, liked, onLike }: { note: NoteData; liked: boolean; o
 
 export function MemoryWall() {
   const [notes, setNotes] = useState<NoteData[]>(SEED_NOTES);
-  const [liked, setLiked] = useState(new Set<number>());
+  const [liked, setLiked] = useState(new Set<string>());
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ author: "", city: "", text: "", song: "" });
   const [highlight, setHighlight] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const writeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Load liked notes from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("ssg-liked-notes");
+      if (stored) setLiked(new Set(JSON.parse(stored)));
+    } catch { /* ignore */ }
+  }, []);
+
+  // Save liked notes to localStorage
+  useEffect(() => {
+    if (liked.size > 0) {
+      localStorage.setItem("ssg-liked-notes", JSON.stringify([...liked]));
+    }
+  }, [liked]);
+
+  // Realtime Firestore listener
+  useEffect(() => {
+    if (!db) {
+      // No Firebase configured — use seed notes only
+      setLoading(false);
+      return;
+    }
+
+    const notesRef = collection(db, "notes");
+    const q = query(notesRef, orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const firestoreNotes: NoteData[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data() as FirestoreNote;
+          return {
+            id: docSnap.id,
+            author: data.author,
+            city: data.city,
+            text: data.text,
+            song: data.song,
+            palette: PALETTE[data.paletteIndex % PALETTE.length],
+            rotate: data.rotate,
+            likes: data.likes,
+          };
+        });
+
+        // Merge: Firestore notes first, then seed notes
+        if (firestoreNotes.length > 0) {
+          setNotes([...firestoreNotes, ...SEED_NOTES]);
+        } else {
+          setNotes(SEED_NOTES);
+        }
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Firestore error:", error);
+        setNotes(SEED_NOTES);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   // Listen for the custom event from HeroSection
   useEffect(() => {
@@ -163,31 +251,80 @@ export function MemoryWall() {
     return () => window.removeEventListener("open-memory-form", handleOpenForm);
   }, []);
 
-  const toggleLike = useCallback((id: number) => {
+  const toggleLike = useCallback(async (id: string) => {
+    const isLiked = liked.has(id);
+    const delta = isLiked ? -1 : 1;
+
+    // Optimistic UI update
     setLiked((prev) => {
       const next = new Set(prev);
-      const delta = next.has(id) ? -1 : 1;
-      next.has(id) ? next.delete(id) : next.add(id);
-      setNotes((ns) => ns.map((n) => n.id === id ? { ...n, likes: n.likes + delta } : n));
+      isLiked ? next.delete(id) : next.add(id);
       return next;
     });
-  }, []);
+    setNotes((ns) => ns.map((n) => n.id === id ? { ...n, likes: n.likes + delta } : n));
 
-  const submitNote = useCallback(() => {
+    // Persist to Firestore (skip for seed notes or if no db)
+    if (db && !id.startsWith("seed-")) {
+      try {
+        const noteRef = doc(db, "notes", id);
+        await updateDoc(noteRef, { likes: increment(delta) });
+      } catch (error) {
+        console.error("Failed to update like:", error);
+        // Revert optimistic update on error
+        setLiked((prev) => {
+          const next = new Set(prev);
+          isLiked ? next.add(id) : next.delete(id);
+          return next;
+        });
+        setNotes((ns) => ns.map((n) => n.id === id ? { ...n, likes: n.likes - delta } : n));
+      }
+    }
+  }, [liked]);
+
+  const submitNote = useCallback(async () => {
     if (!form.text.trim() || !form.author.trim()) return;
-    const p = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-    setNotes((prev) => [{
-      id: Date.now(),
-      author: form.author,
-      city: form.city || "Việt Nam",
-      text: form.text,
-      song: form.song || "Không đề",
-      palette: p,
-      rotate: (Math.random() - 0.5) * 5,
-      likes: 0,
-    }, ...prev]);
-    setForm({ author: "", city: "", text: "", song: "" });
-    setShowForm(false);
+
+    const paletteIndex = Math.floor(Math.random() * PALETTE.length);
+    const rotate = (Math.random() - 0.5) * 5;
+
+    if (db) {
+      // Save to Firestore — realtime listener will auto-update the UI
+      setSubmitting(true);
+      try {
+        await addDoc(collection(db, "notes"), {
+          author: form.author.trim(),
+          city: form.city.trim() || "Việt Nam",
+          text: form.text.trim(),
+          song: form.song.trim() || "Không đề",
+          paletteIndex,
+          rotate,
+          likes: 0,
+          createdAt: serverTimestamp(),
+        });
+        setForm({ author: "", city: "", text: "", song: "" });
+        setShowForm(false);
+      } catch (error) {
+        console.error("Failed to save note:", error);
+        alert("Không thể lưu ghi chú. Vui lòng thử lại!");
+      } finally {
+        setSubmitting(false);
+      }
+    } else {
+      // Fallback: local-only (no Firebase)
+      const p = PALETTE[paletteIndex];
+      setNotes((prev) => [{
+        id: `local-${Date.now()}`,
+        author: form.author,
+        city: form.city || "Việt Nam",
+        text: form.text,
+        song: form.song || "Không đề",
+        palette: p,
+        rotate,
+        likes: 0,
+      }, ...prev]);
+      setForm({ author: "", city: "", text: "", song: "" });
+      setShowForm(false);
+    }
   }, [form]);
 
   return (
@@ -246,17 +383,27 @@ export function MemoryWall() {
           </p>
         </div>
 
-        {/* Masonry columns */}
-        <div className="columns-1 sm:columns-2 lg:columns-3 gap-5">
-          {notes.map((note) => (
-            <StickyNote
-              key={note.id}
-              note={note}
-              liked={liked.has(note.id)}
-              onLike={() => toggleLike(note.id)}
-            />
-          ))}
-        </div>
+        {/* Loading state */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="animate-spin text-[#8B0000]" size={32} />
+            <span className="ml-3 text-[#6B5F4E]" style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.85rem" }}>
+              Đang tải ký ức...
+            </span>
+          </div>
+        ) : (
+          /* Masonry columns */
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-5">
+            {notes.map((note) => (
+              <StickyNote
+                key={note.id}
+                note={note}
+                liked={liked.has(note.id)}
+                onLike={() => toggleLike(note.id)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Torn paper bottom edge */}
@@ -326,10 +473,19 @@ export function MemoryWall() {
 
                 <button
                   onClick={submitNote}
-                  className="mt-7 w-full py-3 bg-[#8B0000] text-[#F5F1E8] hover:bg-[#6B0000] transition-colors flex items-center justify-center gap-2"
+                  disabled={submitting}
+                  className="mt-7 w-full py-3 bg-[#8B0000] text-[#F5F1E8] hover:bg-[#6B0000] transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.72rem", letterSpacing: "0.18em", textTransform: "uppercase" }}
                 >
-                  <Plus size={13} /> Ghim ký ức
+                  {submitting ? (
+                    <>
+                      <Loader2 size={13} className="animate-spin" /> Đang lưu...
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={13} /> Ghim ký ức
+                    </>
+                  )}
                 </button>
               </div>
             </motion.div>
