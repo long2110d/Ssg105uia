@@ -34,6 +34,8 @@ interface PlayerContextType {
   activePeriodId: number;
   setActivePeriodId: (id: number) => void;
   hasPlayed: boolean;
+  isDetailOpen: boolean;
+  setIsDetailOpen: (open: boolean) => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -45,6 +47,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [activePeriodId, setActivePeriodId] = useState<number>(1);
   const [hasPlayed, setHasPlayed] = useState<boolean>(false);
+  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
   const timerRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -215,6 +218,8 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         activePeriodId,
         setActivePeriodId,
         hasPlayed,
+        isDetailOpen,
+        setIsDetailOpen,
       }}
     >
       {children}

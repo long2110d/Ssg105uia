@@ -95,7 +95,7 @@ export function TimelineSection() {
     }
   };
 
-  const { currentTrack, isPlaying, playTrack, togglePlay, progress, nextTrack, prevTrack } = usePlayer();
+  const { currentTrack, isPlaying, playTrack, togglePlay, progress, nextTrack, prevTrack, setIsDetailOpen } = usePlayer();
   const period = PERIODS[active];
 
   const toggleLike = (id: number) => {
@@ -413,7 +413,10 @@ export function TimelineSection() {
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: j * 0.09 + 0.2 }}
-                            onClick={() => playTrack(song, period.id)}
+                            onClick={() => {
+                              playTrack(song, period.id);
+                              setIsDetailOpen(true);
+                            }}
                             className="flex items-center gap-4 py-3 border-b border-[rgba(255,255,255,0.05)] group cursor-pointer hover:border-[#8B0000]/30 transition-colors"
                           >
                             <span
@@ -544,7 +547,10 @@ export function TimelineSection() {
                       return (
                         <div
                           key={song.title}
-                          onClick={() => playTrack(song, period.id)}
+                          onClick={() => {
+                            playTrack(song, period.id);
+                            setIsDetailOpen(true);
+                          }}
                           className="flex items-center py-2.5 px-3 rounded-md hover:bg-white/5 group cursor-pointer transition-colors"
                         >
                           {/* Index / Soundwave */}
