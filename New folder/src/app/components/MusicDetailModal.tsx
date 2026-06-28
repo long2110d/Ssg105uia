@@ -243,7 +243,7 @@ export const MusicDetailModal: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="relative w-full h-full sm:h-auto sm:max-w-5xl bg-[#0F0F0F] border-0 sm:border border-[#C2A47E]/15 sm:rounded-3xl overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] z-10 flex flex-col min-h-screen sm:min-h-[600px] md:grid md:grid-cols-12"
+            className="relative w-[92%] sm:w-full h-auto max-h-[90vh] sm:max-h-none sm:max-w-5xl bg-[#0F0F0F] border border-[#C2A47E]/15 rounded-3xl overflow-y-auto sm:overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] z-10 flex flex-col min-h-[400px] sm:min-h-[600px] md:grid md:grid-cols-12"
           >
             <Grain opacity={0.04} />
 
@@ -326,7 +326,7 @@ export const MusicDetailModal: React.FC = () => {
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: "auto" }}
                   exit={{ opacity: 0, width: 0 }}
-                  className="col-span-12 md:col-span-5 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-[#C2A47E]/10 z-10 bg-[#0A0A0A]/40 overflow-hidden"
+                  className="col-span-12 md:col-span-5 p-4 md:p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-[#C2A47E]/10 z-10 bg-[#0A0A0A]/40 overflow-hidden"
                 >
                   <div
                     className="absolute inset-0 opacity-15 pointer-events-none"
@@ -336,7 +336,7 @@ export const MusicDetailModal: React.FC = () => {
                   />
 
                   {/* TURNTABLE ASSEMBLY */}
-                  <div className="relative w-full max-w-[240px] md:max-w-[275px] aspect-square rounded-2xl bg-gradient-to-br from-[#2D1B10] to-[#120A06] border border-[#3A2214] shadow-[0_15px_35px_rgba(0,0,0,0.7)] p-4 flex items-center justify-center overflow-hidden mb-6 group">
+                  <div className="hidden md:flex relative w-full max-w-[240px] md:max-w-[275px] aspect-square rounded-2xl bg-gradient-to-br from-[#2D1B10] to-[#120A06] border border-[#3A2214] shadow-[0_15px_35px_rgba(0,0,0,0.7)] p-4 items-center justify-center overflow-hidden mb-6 group">
                     <div className="absolute top-1.5 left-1.5 w-3 h-3 border-t-2 border-l-2 border-[#C2A47E]/30" />
                     <div className="absolute top-1.5 right-1.5 w-3 h-3 border-t-2 border-r-2 border-[#C2A47E]/30" />
                     <div className="absolute bottom-1.5 left-1.5 w-3 h-3 border-b-2 border-l-2 border-[#C2A47E]/30" />
@@ -420,7 +420,7 @@ export const MusicDetailModal: React.FC = () => {
                   </div>
 
                   {/* Volume Control */}
-                  <div className="w-full flex items-center justify-center gap-2.5 mt-5 relative z-10">
+                  <div className="w-full hidden md:flex items-center justify-center gap-2.5 mt-5 relative z-10">
                     <button
                       onClick={handleVolumeClick}
                       className="text-white/40 hover:text-white transition-colors cursor-pointer"
