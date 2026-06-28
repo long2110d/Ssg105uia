@@ -635,7 +635,7 @@ export const MusicDetailModal: React.FC = () => {
               </div>
 
               {/* BOTTOM PLAYER ACTION BUTTONS */}
-              <div className="flex items-center gap-6 mt-6 border-t border-white/5 pt-5 select-none z-10">
+              <div className="flex items-center justify-center sm:justify-start gap-6 mt-6 border-t border-white/5 pt-5 select-none z-10">
                 <button
                   onClick={prevTrack}
                   className="w-9 h-9 rounded-full flex items-center justify-center text-[#C2A47E] hover:text-[#F5F1E8] hover:bg-white/5 active:scale-90 transition-all cursor-pointer animate-none"
@@ -661,7 +661,7 @@ export const MusicDetailModal: React.FC = () => {
                   <SkipForward className="w-4.5 h-4.5 fill-current" />
                 </button>
 
-                <div className="flex-1" />
+                <div className="flex-1 hidden sm:block" />
 
                 <div
                   className="text-right text-[#C2A47E]/40 italic pr-1 hidden sm:block select-none"
