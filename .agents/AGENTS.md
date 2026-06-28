@@ -8,14 +8,18 @@
     ```powershell
     git add .
     git commit -m "feat: <description of changes>"
-    git push
-    # Deploy Vercel độc lập để tránh bị nghẽn nếu git push bị treo:
+    # Deploy Vercel trước để tránh bị nghẽn nếu git push bị treo:
     cd "New folder"; npx vercel --prod --yes
+    # Sau đó mới chạy git push (ở thư mục gốc):
+    cd ..; git push
     ```
   - **Môi trường Bash / Linux / macOS**:
     ```bash
-    git add . && git commit -m "feat: <description of changes>" && git push
+    git add . && git commit -m "feat: <description of changes>"
+    # Deploy Vercel trước:
     cd "New folder" && npx vercel --prod --yes
+    # Sau đó mới chạy git push (ở thư mục gốc):
+    cd .. && git push
     ```
 - Nếu lệnh `git push` bị treo hoặc gặp lỗi về xác thực (authentication), hãy chạy lệnh deploy Vercel một cách độc lập để đảm bảo sản phẩm được cập nhật lên web đúng hẹn.
 - Explain to the user that the code has been pushed to Git (or committed) and deployed to Vercel directly.
