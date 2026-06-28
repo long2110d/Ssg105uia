@@ -277,7 +277,7 @@ export const MusicDetailModal: React.FC = () => {
               {/* Mode Toggle Buttons */}
               <div className="flex items-center gap-2">
                 {/* Mode Selectors */}
-                <div className="bg-[#1A1A1A] p-0.5 rounded-lg flex border border-white/5 mr-4">
+                <div className="hidden md:flex bg-[#1A1A1A] p-0.5 rounded-lg border border-white/5 mr-4">
                   <button
                     onClick={() => setMode("listen")}
                     className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer ${
@@ -326,7 +326,7 @@ export const MusicDetailModal: React.FC = () => {
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: "auto" }}
                   exit={{ opacity: 0, width: 0 }}
-                  className="col-span-12 md:col-span-5 p-4 md:p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-[#C2A47E]/10 z-10 bg-[#0A0A0A]/40 overflow-hidden"
+                  className="hidden md:flex md:col-span-5 p-4 md:p-8 flex-col items-center justify-center border-b md:border-b-0 md:border-r border-[#C2A47E]/10 z-10 bg-[#0A0A0A]/40 overflow-hidden"
                 >
                   <div
                     className="absolute inset-0 opacity-15 pointer-events-none"
@@ -634,40 +634,64 @@ export const MusicDetailModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* BOTTOM PLAYER ACTION BUTTONS */}
-              <div className="flex items-center justify-center sm:justify-start gap-6 mt-6 border-t border-white/5 pt-5 select-none z-10">
-                <button
-                  onClick={prevTrack}
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-[#C2A47E] hover:text-[#F5F1E8] hover:bg-white/5 active:scale-90 transition-all cursor-pointer animate-none"
-                >
-                  <SkipBack className="w-4.5 h-4.5 fill-current" />
-                </button>
+              {/* BOTTOM PLAYER AREA (CONTROLS & PROGRESS BAR) */}
+              <div className="mt-6 border-t border-white/5 pt-5 select-none z-10">
+                {/* Progress Slider (Mobile Only) */}
+                <div className="w-full relative z-10 px-2 mb-4 block md:hidden">
+                  <div
+                    className="w-full h-1 bg-white/10 rounded-full cursor-pointer relative group flex items-center"
+                    onClick={handleProgressBarClick}
+                  >
+                    <div
+                      className="h-full bg-gradient-to-r from-[#C2A47E] to-[#E5C79E] rounded-full shadow-[0_0_8px_rgba(194,164,126,0.6)]"
+                      style={{ width: `${progress}%` }}
+                    />
+                    <div
+                      className="absolute w-2 h-2 rounded-full bg-[#F5F1E8] shadow-md border border-[#C2A47E] opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                      style={{ left: `calc(${progress}% - 4px)` }}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center text-[10px] text-[#6B5F4E] font-mono mt-2 uppercase tracking-widest font-semibold">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
+                  </div>
+                </div>
 
-                <button
-                  onClick={togglePlay}
-                  className="w-14 h-14 rounded-full bg-[#C2A47E] hover:bg-[#D4B893] text-[#0F0F0F] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                >
-                  {isPlaying ? (
-                    <Pause className="w-5 h-5 fill-current" />
-                  ) : (
-                    <Play className="w-5 h-5 fill-current translate-x-[1px]" />
-                  )}
-                </button>
+                {/* BOTTOM PLAYER ACTION BUTTONS */}
+                <div className="flex items-center justify-center sm:justify-start gap-6 mt-0 select-none">
+                  <button
+                    onClick={prevTrack}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-[#C2A47E] hover:text-[#F5F1E8] hover:bg-white/5 active:scale-90 transition-all cursor-pointer animate-none"
+                  >
+                    <SkipBack className="w-4.5 h-4.5 fill-current" />
+                  </button>
 
-                <button
-                  onClick={nextTrack}
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-[#C2A47E] hover:text-[#F5F1E8] hover:bg-white/5 active:scale-90 transition-all cursor-pointer"
-                >
-                  <SkipForward className="w-4.5 h-4.5 fill-current" />
-                </button>
+                  <button
+                    onClick={togglePlay}
+                    className="w-14 h-14 rounded-full bg-[#C2A47E] hover:bg-[#D4B893] text-[#0F0F0F] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                  >
+                    {isPlaying ? (
+                      <Pause className="w-5 h-5 fill-current" />
+                    ) : (
+                      <Play className="w-5 h-5 fill-current translate-x-[1px]" />
+                    )}
+                  </button>
 
-                <div className="flex-1 hidden sm:block" />
+                  <button
+                    onClick={nextTrack}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-[#C2A47E] hover:text-[#F5F1E8] hover:bg-white/5 active:scale-90 transition-all cursor-pointer"
+                  >
+                    <SkipForward className="w-4.5 h-4.5 fill-current" />
+                  </button>
 
-                <div
-                  className="text-right text-[#C2A47E]/40 italic pr-1 hidden sm:block select-none"
-                  style={{ fontFamily: "'Dancing Script', cursive", fontSize: "1.2rem" }}
-                >
-                  nhạc ký ức Việt
+                  <div className="flex-1 hidden sm:block" />
+
+                  <div
+                    className="text-right text-[#C2A47E]/40 italic pr-1 hidden sm:block select-none"
+                    style={{ fontFamily: "'Dancing Script', cursive", fontSize: "1.2rem" }}
+                  >
+                    nhạc ký ức Việt
+                  </div>
                 </div>
               </div>
             </div>
