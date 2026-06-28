@@ -5,11 +5,21 @@ import { Instagram, Youtube, Facebook } from "lucide-react";
 const COLS = [
   {
     head: "Khám phá",
-    links: ["Câu chuyện âm nhạc", "Dòng chảy lịch sử", "Tư liệu video", "Tường ký ức"],
+    links: [
+      { name: "Câu chuyện âm nhạc", href: "#stories" },
+      { name: "Dòng chảy lịch sử", href: "#timeline" },
+      { name: "Tư liệu video", href: "#videos" },
+      { name: "Tường ký ức", href: "#memories" },
+    ],
   },
   {
     head: "Dự án",
-    links: ["Về chúng tôi", "Đóng góp tư liệu", "Hợp tác", "Liên hệ"],
+    links: [
+      { name: "Về chúng tôi", href: "#" },
+      { name: "Đóng góp tư liệu", href: "#" },
+      { name: "Hợp tác", href: "#" },
+      { name: "Liên hệ", href: "#" },
+    ],
   },
 ];
 
@@ -95,26 +105,6 @@ export function SiteFooter() {
           >
             Dự án văn hoá phi lợi nhuận kết nối thế hệ trẻ Việt Nam với di sản âm nhạc qua câu chuyện, ký ức và tư liệu lịch sử.
           </p>
-          {/* Newsletter */}
-          <p
-            className="text-[#C2A47E] mb-3"
-            style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.6rem", letterSpacing: "0.25em", textTransform: "uppercase" }}
-          >
-            Nhận bản tin hàng tuần
-          </p>
-          <div className="flex">
-            <input
-              placeholder="email@example.com"
-              className="flex-1 min-w-0 bg-[#1E1E1E] border border-[rgba(194,164,126,0.15)] px-4 py-2.5 text-[#F5F1E8] placeholder-[#3A3A3A] outline-none focus:border-[#C2A47E] transition-colors text-sm"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.8rem" }}
-            />
-            <button
-              className="flex-shrink-0 px-4 py-2.5 bg-[#8B0000] text-[#F5F1E8] hover:bg-[#6B0000] transition-colors"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase" }}
-            >
-              Đăng ký
-            </button>
-          </div>
         </div>
 
         {/* Link columns */}
@@ -128,13 +118,13 @@ export function SiteFooter() {
             </p>
             <ul className="space-y-3">
               {col.links.map((link) => (
-                <li key={link}>
+                <li key={link.name}>
                   <a
-                    href="#"
+                    href={link.href}
                     className="text-[#4A4A4A] hover:text-[#C2A47E] transition-colors duration-200"
                     style={{ fontFamily: "'Inter', sans-serif", fontSize: "0.83rem" }}
                   >
-                    {link}
+                    {link.name}
                   </a>
                 </li>
               ))}
