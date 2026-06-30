@@ -276,29 +276,7 @@ export const MusicDetailModal: React.FC = () => {
 
               {/* Mode Toggle Buttons */}
               <div className="flex items-center gap-2">
-                {/* Mode Selectors */}
-                <div className="hidden md:flex bg-[#1A1A1A] p-0.5 rounded-lg border border-white/5 mr-4">
-                  <button
-                    onClick={() => setMode("listen")}
-                    className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer ${
-                      mode === "listen"
-                        ? "bg-[#C2A47E] text-black shadow-md"
-                        : "text-[#C2A47E]/60 hover:text-white"
-                    }`}
-                  >
-                    <Radio className="w-3.5 h-3.5 inline mr-1 -translate-y-[1px]" /> Nghe
-                  </button>
-                  <button
-                    onClick={() => setMode("read")}
-                    className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer ${
-                      mode === "read"
-                        ? "bg-[#C2A47E] text-black shadow-md"
-                        : "text-[#C2A47E]/60 hover:text-white"
-                    }`}
-                  >
-                    <BookOpen className="w-3.5 h-3.5 inline mr-1 -translate-y-[1px]" /> Đọc
-                  </button>
-                </div>
+
 
                 {/* Share Button */}
                 <button
