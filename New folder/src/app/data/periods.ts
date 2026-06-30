@@ -82,7 +82,7 @@ export const PERIODS: Period[] = [
     songs: [
       { title: "Việt Nam ơi", artist: "Minh Beta", duration: 215, audioUrl: "/songs/viet-nam-oi.webm" },
       { title: "Thịnh vượng việt nam sáng ngời", artist: "Bùi Công Nam", duration: 202, audioUrl: "/songs/thinh-vuong-viet-nam.webm" },
-      { title: "Dòng sông ta về đây", artist: "Nhiều nghệ sĩ", duration: 241, audioUrl: "/songs/dong-song-ta-ve-day.webm" }
+      { title: "Dòng sông lời thề", artist: "Nhiều nghệ sĩ", duration: 241, audioUrl: "/songs/dong-song-loi-the.mp3" }
     ],
     body: "Âm nhạc Việt Nam chuyển mình mạnh mẽ, hội nhập quốc tế với nhiều thể loại đa dạng, trẻ trung và tràn đầy năng lượng tích cực.",
     detail: "Thế hệ nghệ sĩ mới mang đến một diện mạo tươi sáng, tôn vinh tinh thần tự hào dân tộc và khát vọng vươn lên của đất nước.",
